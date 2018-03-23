@@ -20,6 +20,7 @@ spring security oauth2是建立在spring security基础之上的，所以有一�
 
 
 启动spring boot后，会自动创建如下endpoint ::
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  Mapped "{[/oauth/authorize],methods=[POST],params=[user_oauth_approval]}" onto public org.springframework.web.servlet.View org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint.approveOrDeny(java.util.Map<java.lang.String, java.lang.String>,java.util.Map<java.lang.String, ?>,org.springframework.web.bind.support.SessionStatus,java.security.Principal)
  Mapped "{[/oauth/authorize]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint.authorize(java.util.Map<java.lang.String, java.lang.Object>,java.util.Map<java.lang.String, java.lang.String>,org.springframework.web.bind.support.SessionStatus,java.security.Principal)
  Mapped "{[/oauth/token],methods=[GET]}" onto public org.springframework.http.ResponseEntity<org.springframework.security.oauth2.common.OAuth2AccessToken> org.springframework.security.oauth2.provider.endpoint.TokenEndpoint.getAccessToken(java.security.Principal,java.util.Map<java.lang.String, java.lang.String>) throws org.springframework.web.HttpRequestMethodNotSupportedException
@@ -27,7 +28,7 @@ spring security oauth2是建立在spring security基础之上的，所以有一�
  Mapped "{[/oauth/check_token]}" onto public java.util.Map<java.lang.String, ?> org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint.checkToken(java.lang.String)
  Mapped "{[/oauth/confirm_access]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint.getAccessConfirmation(java.util.Map<java.lang.String, java.lang.Object>,javax.servlet.http.HttpServletRequest) throws java.lang.Exception
  Mapped "{[/oauth/error]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint.handleError(javax.servlet.http.HttpServletRequest)
-
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  使用Postman测试结果如下：
  
  用POST方式访问oauth/token接口，password模式：
@@ -87,7 +88,7 @@ http://localhost:3130/oauth/token?
 	scope=select&
 	client_id=client_1&
 	client_secret=123456
-
+`````````````````````````````````````````````````````````
 @FrameworkEndpoint
 public class TokenEndpoint extends AbstractEndpoint {
 
@@ -114,8 +115,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 
 <3> 将TokenRequest传递给TokenGranter颁发token
 
-
--------------------------------------
+`````````````````````````````````````````````````------------------------------------
 以下是生成token部分代码：
 根据上面grant(tokenRequest.getGrantType(), tokenRequest);
 调用：org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer
