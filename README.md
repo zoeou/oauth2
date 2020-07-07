@@ -1,28 +1,23 @@
-oauth2
-	接口对接的场景，A厂家有一套HTTP接口需要提供给B厂家使用，由于是外网环境，所以需要有一套安全机制保障，
-这个时候oauth2就可以作为一个方案
+接口对接的场景，A厂家有一套HTTP接口需要提供给B厂家使用，由于是外网环境，所以需要有一套安全机制保障，这个时候oauth2就可以作为一个方案，关于oauth2，其实是一个规范，本文重点讲解spring对他进行的实现
 
-关于oauth2，其实是一个规范，本文重点讲解spring对他进行的实现
-
-使用oauth2保护你的应用，可以分为简易的分为三个步骤
-
-配置资源服务器
-配置认证服务器
-配置spring security
+使用oauth2保护你的应用，可以分为简易的分为三个步骤:
+1. 配置资源服务器
+2. 配置认证服务器
+3. 配置spring security
 
 spring security oauth2是建立在spring security基础之上的，所以有一些体系是公用的。
 
 
-环境准备
-1. curl: 7.57.0 (x86_64-w64-mingw32)
+##### 环境准备
+1. curl: 7.57.0 
 2. spring-boot-version: 1.5.10.RELEASE
 
-项目准备
+##### 项目准备
 1. 引入maven依赖
 2. 创建资源api暴露一个商品查询接口,后续不做安全限制,一个订单查询接口,后续添加访问控制
 3. 配置资源服务器和授权服务器
 
-pom.xml
+##### pom.xml
 ```
 <dependency>
 	<groupId>org.springframework.boot</groupId>
@@ -34,7 +29,7 @@ pom.xml
 </dependency>
 ```
 
-配置类: SecurityConfiguration
+##### 配置类: SecurityConfiguration
 ```
 @Configuration
 @EnableWebSecurity
@@ -63,7 +58,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter{
 }
 
 ```
-配置类: OAuth2ServerConfig
+#####  配置类: OAuth2ServerConfig
 ```
 @Configuration
 public class OAuth2ServerConfig {
@@ -147,7 +142,7 @@ public class OAuth2ServerConfig {
 ```
 
 启动spring boot后，会自动创建如下endpoint ::
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
  Mapped "{[/oauth/authorize],methods=[POST],params=[user_oauth_approval]}" onto public org.springframework.web.servlet.View org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint.approveOrDeny(java.util.Map<java.lang.String, java.lang.String>,java.util.Map<java.lang.String, ?>,org.springframework.web.bind.support.SessionStatus,java.security.Principal)
  Mapped "{[/oauth/authorize]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.security.oauth2.provider.endpoint.AuthorizationEndpoint.authorize(java.util.Map<java.lang.String, java.lang.Object>,java.util.Map<java.lang.String, java.lang.String>,org.springframework.web.bind.support.SessionStatus,java.security.Principal)
  Mapped "{[/oauth/token],methods=[GET]}" onto public org.springframework.http.ResponseEntity<org.springframework.security.oauth2.common.OAuth2AccessToken> org.springframework.security.oauth2.provider.endpoint.TokenEndpoint.getAccessToken(java.security.Principal,java.util.Map<java.lang.String, java.lang.String>) throws org.springframework.web.HttpRequestMethodNotSupportedException
@@ -155,14 +150,14 @@ public class OAuth2ServerConfig {
  Mapped "{[/oauth/check_token]}" onto public java.util.Map<java.lang.String, ?> org.springframework.security.oauth2.provider.endpoint.CheckTokenEndpoint.checkToken(java.lang.String)
  Mapped "{[/oauth/confirm_access]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.security.oauth2.provider.endpoint.WhitelabelApprovalEndpoint.getAccessConfirmation(java.util.Map<java.lang.String, java.lang.Object>,javax.servlet.http.HttpServletRequest) throws java.lang.Exception
  Mapped "{[/oauth/error]}" onto public org.springframework.web.servlet.ModelAndView org.springframework.security.oauth2.provider.endpoint.WhitelabelErrorEndpoint.handleError(javax.servlet.http.HttpServletRequest)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+```
 测试结果如下：
  
-访问oauth/token接口，password模式：
+1. 访问oauth/token接口，password模式：
 ```
 curl -X POST 'http://localhost:3130/oauth/token?username=user_1&password=123456&grant_type=password&scope=select&client_id=client_2&client_secret=123456'
 ```
- 返回结果：
+ 2. 返回结果：
 {
     "access_token": "990df2a9-fe59-40e8-8a4b-9766e756e88d",
     "token_type": "bearer",
@@ -171,37 +166,36 @@ curl -X POST 'http://localhost:3130/oauth/token?username=user_1&password=123456&
     "scope": "select"
 }
 
-直接访问资源接口
+3. 直接访问资源接口
 ```
 curl http://localhost:3130/order/1
 ```
-返回结果：
+4. 返回结果：
 	{"error":"unauthorized","error_description":"Full authentication is required to access this resource"}
 
-token不对的情况下：
+5. token不对的情况下：
 ```
 curl http://localhost:3130/order/1?access_token=db0a6ddc-96cb-4156-9500-7b7e13b6e42d
 ```
-返回结果：
+6. 返回结果：
 ```
 {
     "error": "invalid_token",
     "error_description": "Invalid access token: db0a6ddc-96cb-4156-9500-7b7e13b6e42d"
 }
 ```
-token正确的情况下：
+7. token正确的情况下：
 ```
 curl http://localhost:3130/order/1?access_token=990df2a9-fe59-40e8-8a4b-9766e756e88d
 ```
-返回结果：
+8. 返回结果：
 order id : 1 
 
-
- 用POST方式访问oauth/token接口，client模式：
+9. 访问oauth/token接口，client模式：
 ```
 curl -X POST  'http://localhost:3130/oauth/token?grant_type=client_credentials&scope=select&client_id=client_1&client_secret=123456'
 ```
-返回结果：
+10. 返回结果：
 {
     "access_token": "e6b29f5d-9813-46d5-92ce-2fa89dec9392",
     "token_type": "bearer",
@@ -211,7 +205,7 @@ curl -X POST  'http://localhost:3130/oauth/token?grant_type=client_credentials&s
 
 
 
-获取token,在这之前已经校验过请求的相关信息
+##### 获取token,在这之前已经校验过请求的相关信息
 ```
 package org.springframework.security.oauth2.provider.endpoint;
 @FrameworkEndpoint
@@ -241,7 +235,7 @@ public class TokenEndpoint extends AbstractEndpoint {
 3. 将TokenRequest传递给TokenGranter颁发token
 
 
-以下是生成token部分代码：
+##### 以下是生成token部分代码：
 根据上面grant(tokenRequest.getGrantType(), tokenRequest);
 调用：org.springframework.security.oauth2.config.annotation.web.configurers.AuthorizationServerEndpointsConfigurer
 ```
@@ -264,10 +258,10 @@ public class TokenEndpoint extends AbstractEndpoint {
 	}
 ```
 认证模式配置
-authorization_code	
-refresh_token  ==>refresh_token 刷新token专用
-implicit  ==>implicit简化模式
-client_credentials
+1. authorization_code	
+2. refresh_token  ==>refresh_token 刷新token专用
+3. implicit  ==>implicit简化模式
+4. client_credentials
 
 
 ```
@@ -588,6 +582,7 @@ public class InMemoryTokenStore implements TokenStore {
 
 传参信息,就是方法中的authentication对象信息
 authentication对象存了storedRequest对象，具体信息有：
+```
 	requestParameters = {grant_type=client_credentials, client_id=client_1, scope=select}
 	resourceIds = [order];
 	scope = [select];
@@ -597,7 +592,7 @@ authentication对象存了storedRequest对象，具体信息有：
 	approved = true;
 	authorities = [client];
 	responeseType = [];
-
+```
 传参信息：values = {client_id=client_1, scope=select}
 
 调用 MessageDigest  用MD5生成
@@ -755,10 +750,11 @@ public static String collectionToDelimitedString(Collection<?> coll, String deli
 	
 	
 
-发送请求时 http://localhost:3130/order/1 （加上access_token此请求不被拦截）
+#####  发送请求时 http://localhost:3130/order/1 （加上access_token此请求不被拦截）
 	
 
 经过filter
+验证身份
 ```
 package org.springframework.security.oauth2.provider.authentication.OAuth2AuthenticationProcessingFilter;
 public class OAuth2AuthenticationProcessingFilter implements Filter, InitializingBean {
@@ -827,6 +823,9 @@ public class OAuth2AuthenticationProcessingFilter implements Filter, Initializin
 	
 	
 进入BearerTokenExtractor  extractToken 方法	
+通过header 获取token
+通问get传参的方式获取token
+
 ```
 package org.springframework.security.oauth2.provider.authentication.BearerTokenExtractor;
 public class BearerTokenExtractor implements TokenExtractor {
